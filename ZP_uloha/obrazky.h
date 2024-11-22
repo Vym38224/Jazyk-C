@@ -1,13 +1,15 @@
 #ifndef OBRAZKY_H
 #define OBRAZKY_H
 
-typedef struct {
-    int h;      // výška obrázku
-    int w;      // šířka obrázku
+typedef struct
+{
+    int h;        // výška obrázku
+    int w;        // šířka obrázku
     short **data; // dvourozměrné pole pro uložení hodnot pixelů
 } obrazek;
 
-typedef enum {
+typedef enum
+{
     NEGATIV,
     ZMENA_JASU,
     ZMENA_KONTRASTU
@@ -24,13 +26,8 @@ typedef enum {
 // Globální proměnná pro uchování stavu chyby
 extern int chyba;
 
-// Funkce pro vytvoření a zrušení obrázku
-obrazek* vytvor_obrazek(int h, int w);
-void zrus_obrazek(obrazek *img);
-
-// Funkce pro nastavení a získání hodnoty pixelu
-void nastav_pixel(obrazek *img, int x, int y, short hodnota);
-short ziskej_pixel(obrazek *img, int x, int y);
+// Funkce pro vytvoření obrázku
+obrazek *vytvor_obrazek(int h, int w);
 
 // Další funkce
 obrazek inicializace(int h, int w);
@@ -48,7 +45,7 @@ void uloz_do_souboru(obrazek obr, const char *soubor);
 // Pomocné funkce
 int vyska(obrazek obr);
 int sirka(obrazek obr);
-short prvek(obrazek obr, int i, int j);
+char prvek(obrazek obr, int i, int j);
 void nastav_prvek(obrazek obr, int i, int j, short hodnota);
 
-#endif // OBRAZKY_H
+#endif
