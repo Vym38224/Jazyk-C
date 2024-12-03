@@ -1,0 +1,11 @@
+# 1 "priklad1.c"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "priklad1.c"
+
+
+int main(){
+    float r = 3;
+    float o = 2 * 3.14 * r;
+    return 0;
+}

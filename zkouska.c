@@ -1,43 +1,18 @@
 #include <stdio.h>
-#include <time.h>
+#include <stdlib.h>
 
-void otoc_pole_pointer(int *p, int velikost);
-void otoc_pole_array(int p[], int velikost);
+int main(void)
+{
+    int pole[10];
 
-#include <stdio.h>
-
-int main() {
-    char c;
-    int i;
-    double d;
-
-    char *pc = &c;
-    int *pi = &i;
-    double *pd = &d;
-
-    printf("Size of char: %ld bytes\n", (char *)(pc + 1) - pc);
-    printf("Size of int: %ld bytes\n", (char *)(pi + 1) - (char *)pi);
-    printf("Size of double: %ld bytes\n", (char *)(pd + 1) - (char *)pd);
-
-    return 0;
-}
-
-void otoc_pole_pointer(int *p, int velikost) {
-    int i;
-    int foo;
-    for (i = 0; i < velikost / 2; i++) {
-        foo = *(p + i);
-        *(p + i) = *(p + velikost - i - 1);
-        *(p + velikost - i - 1) = foo;
+    for (int i = 0; i < 10; i++)
+    {
+        int k = i + 1;
+        *(pole + i) = k * 7;
     }
-}
 
-void otoc_pole_array(int p[], int velikost) {
-    int i;
-    int foo;
-    for (i = 0; i < velikost / 2; i++) {
-        foo = p[i];
-        p[i] = p[velikost - i - 1];
-        p[velikost - i - 1] = foo;
+    for (int i = 0; i < 10; i++)
+    {
+        printf("%d\n", *(pole + i));
     }
 }
