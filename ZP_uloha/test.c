@@ -62,5 +62,30 @@ int main()
     printf("Zmena kontrastu obrazku obr1 : \n");
     zobraz(obr6);
     printf("\n\n");
+
+    // Vytvoření testovacího souboru
+    const char *test_soubor = "test_input.txt";
+    FILE *f = fopen(test_soubor, "w");
+    if (f == NULL)
+    {
+        perror("Nelze vytvořit testovací soubor");
+        return 1;
+    }
+
+    fprintf(f, "1 2 3\n4 5 6\n7 8 9\n");
+    fclose(f);
+
+    // Načtení obrázku ze souboru
+    obrazek obr = nacti_ze_souboru(test_soubor);
+    if (obr.data == NULL)
+    {
+        printf("Chyba při načítání obrázku\n");
+        return 1;
+    }
+
+    // Uložení obrázku do nového souboru
+    const char *output_soubor = "test_output.txt";
+    uloz_do_souboru(obr, output_soubor);
+
     return 0;
 }

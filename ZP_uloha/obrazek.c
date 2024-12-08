@@ -153,7 +153,7 @@ obrazek morfing(obrazek obr1, obrazek obr2)
         {
             short hodnota1 = prvek(obr1, i, j);
             short hodnota2 = prvek(obr2, i, j);
-            short nova_hodnota = (short)((hodnota1 + hodnota2) / 2.0 + 0.5);
+            short nova_hodnota = (short)((hodnota1 + hodnota2) / 2.0 + 0.5); // Zaokrouhlení + 0.5
             nastav_prvek(vysledek, i, j, nova_hodnota);
         }
     }
@@ -253,7 +253,7 @@ obrazek jasova_operace(obrazek obr, operace o, ...)
         {
             for (int j = 0; j < sirka(obr); j++)
             {
-                int nova_hodnota = (int)(k1 * prvek(obr, i, j) + k2 + 0.5); // Zaokrouhlení (int) + 0.5
+                int nova_hodnota = (int)(k1 * prvek(obr, i, j) + k2 + 0.5); // Zaokrouhlení + 0.5
                 if (nova_hodnota < 0)
                 {
                     nova_hodnota = 0;
@@ -302,18 +302,18 @@ obrazek nacti_ze_souboru(const char *soubor)
         {
             // Zjištění šířky z prvního řádku
             char *p = line;
-            while (*p != "\0")
+            while (*p != '\0')
             {
                 // Přeskočíme mezery
-                while (*p == " ")
+                while (*p == ' ')
                 {
                     p++;
                 }
-                if (*p != "\0")
+                if (*p != '\0')
                 {
                     w++;
                     // Přeskočíme číslo
-                    while (*p != " " && *p != "\0")
+                    while (*p != ' ' && *p != '\0')
                     {
                         p++;
                     }
@@ -328,7 +328,14 @@ obrazek nacti_ze_souboru(const char *soubor)
     if (obr.data == NULL)
     {
         // Inicializace selhala, zavřeme soubor a vrátíme prázdný obrázek
-        fclose(f);
+        if (fclose(f) != 0)
+        {
+            chyba = CHYBA_ZAVRENI;
+        }
+        else
+        {
+            chyba = BEZ_CHYBY;
+        }
         chyba = CHYBA_ALOKACE;
         return obr;
     }
@@ -347,8 +354,14 @@ obrazek nacti_ze_souboru(const char *soubor)
         }
     }
 
-    fclose(f);
-    chyba = BEZ_CHYBY;
+    if (fclose(f) != 0)
+    {
+        chyba = CHYBA_ZAVRENI;
+    }
+    else
+    {
+        chyba = BEZ_CHYBY;
+    }
     return obr;
 }
 
@@ -375,7 +388,14 @@ void uloz_do_souboru(obrazek obr, const char *soubor)
         fprintf(f, "\n");
     }
 
-    fclose(f);
+    if (fclose(f) != 0)
+    {
+        chyba = CHYBA_ZAVRENI;
+    }
+    else
+    {
+        chyba = BEZ_CHYBY;
+    }
     chyba = BEZ_CHYBY;
 }
 
