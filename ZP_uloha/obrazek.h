@@ -26,10 +26,6 @@ extern int chyba;
 #define CHYBA_TYPU 4
 #define CHYBA_JINA 5
 
-// Funkce pro vytvoření obrázku
-extern obrazek *vytvor_obrazek(int h, int w);
-
-// Další funkce
 extern obrazek inicializace(int h, int w);
 extern obrazek cerny(int h, int w);
 extern void odstran(obrazek obr);

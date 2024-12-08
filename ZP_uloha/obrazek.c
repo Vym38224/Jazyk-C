@@ -6,59 +6,33 @@
 // Globální proměnná pro uchování stavu chyby
 int chyba = BEZ_CHYBY;
 
-// Funkce pro vytvoření obrázku
-obrazek *vytvor_obrazek(int h, int w)
-{
-    obrazek *obr = (obrazek *)malloc(sizeof(obrazek));
-    if (obr == NULL)
-    {
-        chyba = CHYBA_ALOKACE;
-    }
-    obr->h = h;
-    obr->w = w;
-    obr->data = (short **)malloc(h * sizeof(short *));
-    if (obr->data == NULL)
-    {
-        chyba = CHYBA_ALOKACE;
-    }
-    for (int i = 0; i < h; i++)
-    {
-        obr->data[i] = (short *)malloc(w * sizeof(short));
-        if (obr->data[i] == NULL)
-        {
-            chyba = CHYBA_ALOKACE;
-        }
-    }
-    chyba = BEZ_CHYBY;
-    return obr;
-}
-
 // Funkce pro inicializaci obrázku. Vytvoři obrazek o velikosti h × w včetně alokace paměti pro data
 obrazek inicializace(int h, int w)
 {
     obrazek obr;
     obr.h = h;
     obr.w = w;
-    // Alokace paměti pro řadky
     obr.data = (short **)malloc(h * sizeof(short *));
     if (obr.data == NULL)
     {
         chyba = CHYBA_ALOKACE;
-        free(obr.data);
+        obr.h = 0;
+        obr.w = 0;
         return obr;
     }
-
-    // Alokace paměti pro sloupce
     for (int i = 0; i < h; i++)
     {
         obr.data[i] = (short *)malloc(w * sizeof(short));
         if (obr.data[i] == NULL)
         {
-            chyba = CHYBA_ALOKACE;
             for (int j = 0; j < i; j++)
             {
                 free(obr.data[j]);
             }
+            free(obr.data);
+            chyba = CHYBA_ALOKACE;
+            obr.h = 0;
+            obr.w = 0;
             return obr;
         }
     }
@@ -70,6 +44,11 @@ obrazek inicializace(int h, int w)
 obrazek cerny(int h, int w)
 {
     obrazek obr_cerny = inicializace(h, w);
+    if (obr_cerny.data == NULL)
+    {
+        // Inicializace selhala, vracíme prázdný obrázek
+        return obr_cerny;
+    }
     for (int i = 0; i < vyska(obr_cerny); i++)
     {
         for (int j = 0; j < sirka(obr_cerny); j++)
@@ -77,6 +56,7 @@ obrazek cerny(int h, int w)
             nastav_prvek(obr_cerny, i, j, 0);
         }
     }
+    chyba = BEZ_CHYBY;
     return obr_cerny;
 }
 
@@ -88,6 +68,7 @@ void odstran(obrazek obr)
         free(obr.data[i]);
     }
     free(obr.data);
+    chyba = BEZ_CHYBY;
 }
 
 // Funkce pro zobrazení obrázku
@@ -128,6 +109,12 @@ void zobraz(obrazek obr)
 obrazek otoc90(obrazek obr)
 {
     obrazek obr_otoc90 = inicializace(sirka(obr), vyska(obr));
+    if (obr_otoc90.data == NULL)
+    {
+        // Inicializace selhala, vracíme prázdný obrázek
+        chyba = CHYBA_ALOKACE;
+        return obr_otoc90;
+    }
     for (int i = 0; i < vyska(obr); i++)
     {
         for (int j = 0; j < sirka(obr); j++)
@@ -142,23 +129,37 @@ obrazek otoc90(obrazek obr)
 // Funkce pro morfing dvou obrázků
 obrazek morfing(obrazek obr1, obrazek obr2)
 {
-    if (vyska(obr1) != vyska(obr2) || sirka(obr1) != sirka(obr2))
+    if (obr1.h != obr2.h || obr1.w != obr2.w)
     {
         chyba = CHYBA_TYPU;
+        obrazek prazdny;
+        prazdny.h = 0;
+        prazdny.w = 0;
+        prazdny.data = NULL;
+        return prazdny;
     }
-    else
+
+    obrazek vysledek = inicializace(obr1.h, obr1.w);
+    if (vysledek.data == NULL)
     {
-        obrazek obr3 = inicializace(vyska(obr1), sirka(obr1));
-        for (int i = 0; i < vyska(obr1); i++)
-        {
-            for (int j = 0; j < sirka(obr1); j++)
-            {
-                nastav_prvek(obr3, i, j, (prvek(obr1, i, j) + prvek(obr2, i, j)) / 2);
-            }
-        }
-        chyba = BEZ_CHYBY;
-        return obr3;
+        // Inicializace selhala, vracíme prázdný obrázek
+        chyba = CHYBA_ALOKACE;
+        return vysledek;
     }
+
+    for (int i = 0; i < vyska(vysledek); i++)
+    {
+        for (int j = 0; j < sirka(vysledek); j++)
+        {
+            short hodnota1 = prvek(obr1, i, j);
+            short hodnota2 = prvek(obr2, i, j);
+            short nova_hodnota = (short)((hodnota1 + hodnota2) / 2.0 + 0.5);
+            nastav_prvek(vysledek, i, j, nova_hodnota);
+        }
+    }
+
+    chyba = BEZ_CHYBY;
+    return vysledek;
 }
 
 // Funkce pro získání minimální hodnoty pixelu
@@ -204,10 +205,17 @@ obrazek jasova_operace(obrazek obr, operace o, ...)
     va_start(args, o); // Inicializace proměnné pro argumenty
 
     obrazek obr2 = inicializace(vyska(obr), sirka(obr));
+    if (obr2.data == NULL)
+    {
+        // Inicializace selhala, vracíme prázdný obrázek
+        chyba = CHYBA_ALOKACE;
+        va_end(args);
+        return obr2;
+    }
 
     switch (o)
     {
-    case 0: // NEGATIV
+    case NEGATIV:
         for (int i = 0; i < vyska(obr); i++)
         {
             for (int j = 0; j < sirka(obr); j++)
@@ -216,7 +224,7 @@ obrazek jasova_operace(obrazek obr, operace o, ...)
             }
         }
         break;
-    case 1: // ZMENA_JASU
+    case ZMENA_JASU:
     {
         int hodnota = va_arg(args, int); // Hodnota jasu
         for (int i = 0; i < vyska(obr); i++)
@@ -237,7 +245,7 @@ obrazek jasova_operace(obrazek obr, operace o, ...)
         }
         break;
     }
-    case 2: // ZMENA_KONTRASTU
+    case ZMENA_KONTRASTU:
     {
         double k1 = va_arg(args, double); // mění kontrast
         int k2 = va_arg(args, int);       // mění jas
@@ -261,6 +269,7 @@ obrazek jasova_operace(obrazek obr, operace o, ...)
     }
     default:
         chyba = CHYBA_TYPU;
+        va_end(args);
         return inicializace(0, 0);
     }
 
@@ -276,16 +285,61 @@ obrazek nacti_ze_souboru(const char *soubor)
     if (f == NULL)
     {
         chyba = CHYBA_OTEVRENI;
-        exit(1);
+        obrazek prazdny;
+        prazdny.h = 0;
+        prazdny.w = 0;
+        prazdny.data = NULL;
+        return prazdny;
     }
 
-    int h, w;
-    fscanf(f, "%i %i", &h, &w);
-    obrazek obr = inicializace(h, w);
+    int h = 0, w = 0;
+    char line[1024];
 
-    for (int i = 0; i < vyska(obr); i++)
+    // Načítání řádek po řádku pro zjištění výšky a následně i šířky
+    while (fgets(line, sizeof(line), f))
     {
-        for (int j = 0; j < sirka(obr); j++)
+        if (h == 0)
+        {
+            // Zjištění šířky z prvního řádku
+            char *p = line;
+            while (*p != "\0")
+            {
+                // Přeskočíme mezery
+                while (*p == " ")
+                {
+                    p++;
+                }
+                if (*p != "\0")
+                {
+                    w++;
+                    // Přeskočíme číslo
+                    while (*p != " " && *p != "\0")
+                    {
+                        p++;
+                    }
+                }
+            }
+        }
+        h++;
+    }
+
+    // Inicializace obrázku
+    obrazek obr = inicializace(h, w);
+    if (obr.data == NULL)
+    {
+        // Inicializace selhala, zavřeme soubor a vrátíme prázdný obrázek
+        fclose(f);
+        chyba = CHYBA_ALOKACE;
+        return obr;
+    }
+
+    // Přesuneme se zpět na začátek souboru
+    rewind(f);
+
+    // Načítání hodnot pixelů do obrázku
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
         {
             short hodnota;
             fscanf(f, "%hi", &hodnota);
@@ -305,16 +359,18 @@ void uloz_do_souboru(obrazek obr, const char *soubor)
     if (f == NULL)
     {
         chyba = CHYBA_OTEVRENI;
-        exit(1);
+        return;
     }
-
-    fprintf(f, "%i %i\n", vyska(obr), sirka(obr));
 
     for (int i = 0; i < vyska(obr); i++)
     {
         for (int j = 0; j < sirka(obr); j++)
         {
-            fprintf(f, "%hi ", prvek(obr, i, j));
+            fprintf(f, "%hi", prvek(obr, i, j));
+            if (j < sirka(obr) - 1)
+            {
+                fprintf(f, " ");
+            }
         }
         fprintf(f, "\n");
     }
@@ -326,11 +382,13 @@ void uloz_do_souboru(obrazek obr, const char *soubor)
 // Pomocné funkce
 int vyska(obrazek obr)
 {
+    chyba = BEZ_CHYBY;
     return obr.h;
 }
 
 int sirka(obrazek obr)
 {
+    chyba = BEZ_CHYBY;
     return obr.w;
 }
 
