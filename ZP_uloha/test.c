@@ -72,7 +72,7 @@ int main()
         return 1;
     }
 
-    fprintf(f, "1 2 3\n4 5 6\n7 8 9\n");
+    fprintf(f, "1 2 3\n3 2 1\n1 2 3\n");
     fclose(f);
 
     // Načtení obrázku ze souboru
@@ -82,10 +82,12 @@ int main()
         printf("Chyba při načítání obrázku\n");
         return 1;
     }
+    printf("Obrazek načtený ze souboru:\n");
+    zobraz(obr);
 
     // Uložení obrázku do nového souboru
     const char *output_soubor = "test_output.txt";
-    uloz_do_souboru(obr, output_soubor);
+    uloz_do_souboru(obr6, output_soubor);
 
     return 0;
 }

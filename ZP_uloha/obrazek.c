@@ -129,6 +129,7 @@ obrazek otoc90(obrazek obr)
 // Funkce pro morfing dvou obrázků
 obrazek morfing(obrazek obr1, obrazek obr2)
 {
+    // Kontrola, zda jsou oba obrázky stejně velké. Pokud ne, vracíme prázdný obrázek
     if (obr1.h != obr2.h || obr1.w != obr2.w)
     {
         chyba = CHYBA_TYPU;
